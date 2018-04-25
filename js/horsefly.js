@@ -1,5 +1,5 @@
 var c, ctx;
-var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 14, tSize = 18;
+var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 14, tSize = 18, statusBar;
 
 var dataset = [];
 var path = [];
@@ -129,8 +129,13 @@ var redrawScene = function () {
 };
 
 var move = function() {
+    statusBar.innerHTML = '<b>Status: </b> Delivery in progress!';
+
     pathDrone = pathDrone.slice(1);
-    if (pathDrone.length == 0) return;
+    if (pathDrone.length == 0) {
+        statusBar.innerHTML = '<b>Status: </b> Delivery finished!';
+        return;
+    }
     var path = pathDrone[0]; 
     currentPath = path;
     var start = path[0], end = path[1];
@@ -186,6 +191,8 @@ var getPath = function () {
         ctx.closePath();
         $(c).unbind("mouseup");
     });
+    statusBar.innerHTML = '<b>Status</b>: Next, click on Draw Homes, then click anywhere on the canvas below to draw a \
+                            set of points representing homes for delivery.';
 };
 
 var getDataset = function () {
@@ -205,6 +212,8 @@ var getDataset = function () {
         ctx.closePath();
         $(c).unbind("mouseup");
     });
+    statusBar.innerHTML = '<b>Status</b>: Finally, click on Run! to run the algorithm and see the delivery animation. The algorithm will cluster the homes, \
+                            perform a nearest neighbor search and create an approximately optimal path for the truck and drone to deliver all the packages.';
 };
 
 var tracePath = function() {
@@ -213,6 +222,9 @@ var tracePath = function() {
     truck.y = path[0][0][1];
     drone.x = path[0][0][0];
     drone.y = path[0][0][1];
+
+    statusBar.innerHTML = '<b>Status: </b> Clustering delivery home data using DBSCAN/KMeans.';
+
     var queryRange = 100;
     var minPointsInCluster = 3;
     var clusters = findClusters(dataset, queryRange, minPointsInCluster);
@@ -227,6 +239,9 @@ var tracePath = function() {
     var toDict = function (point) {
         return {x: point[0], y: point[1]};
     };
+
+    statusBar.innerHTML = '<b>Status: </b> Performing a nearest-neighbour search using kdTree.';
+
     var tree = new kdTree(pathPoints.map(toDict), distance, ["x", "y"]);
     var pausePoints = [];
     var clusterToPauseMapping = {};
@@ -248,6 +263,8 @@ var tracePath = function() {
     pPoints.sort(function (a, b) {
         return ((a[0] - b[0]) || (a[0] === b[0] && a[1] - b[1]));
     });
+
+    statusBar.innerHTML = '<b>Status: </b> Deciding an approximate optimal path for drone and truck.';
 
     path.forEach(function(p) {
         tPath.push(p[0]);
@@ -284,6 +301,9 @@ var tracePath = function() {
 
 var init = function (droneSpeed, truckSpeed) {
     c = document.getElementById("canvas");
+    statusBar = document.getElementById("statusBox");
+    statusBar.innerHTML = '<b>Status</b>: Click on Draw Path, then click anywhere on the canvas below to draw the starting point of the path and \
+                            then click somewhere else on canvas to draw the ending point, then the next ending point and so on, thus creating a path.';
     c.width = c.clientWidth;
     c.height = c.clientHeight;
     ctx = c.getContext("2d");

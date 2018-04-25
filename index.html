@@ -12,10 +12,23 @@
   #canvas {
     display: block;
     width: 80vw;
-    height: 75vh;
+    height: 73vh;
     border: 1px solid white;
     padding: 0;
     margin: auto;
+  }
+  .txt {
+    text-align: left;
+  }
+  #statusBox {
+    float: left;
+    margin-left: 130px;
+    border: 1px solid white;
+    font-size: 14px;
+    width:40%;
+    text-align: justify;
+    padding: 5px;
+    color: lightgreen;
   }
 </style>
 <script src="js/jquery.min.js"></script>
@@ -30,17 +43,18 @@
       <div class="cover-container">
         <div class="masthead clearfix">
           <div class="inner">
-            <h3 class="masthead-brand">HorseFly</h3>
+            <h3 class="masthead-brand"><a href="/">HorseFly</a></h3>
           </div>
         </div>
         <div class="inner cover">
           <h1 class="cover-heading">What is HorseFly?</h1>
-          <p class="lead">HorseFly is a a delivery system where a moving truck (with packages) and a drone are autonomously coordinating to deliver the packages in the customer homes in approximately minimum time.</p>
+          <p class="lead txt">HorseFly is a a delivery system where a moving truck (with packages) and a drone are autonomously coordinating to deliver the packages to the customer homes in approximately minimum time.</p>
+          <br/>
           <h1 class="cover-heading">How to visualize?</h1>
-          <p class="lead">
-            Click on Draw Path to draw a delivery path.<br/>
-            Click on Draw Homes to draw a bunch of homes for package delivery.<br/>
-            Click on Run to run the algorithm to see the visualization.<br/>
+          <p class="lead txt">
+            &#x25CF; Click on Draw Path to draw a delivery path.<br/>
+            &#x25CF; Click on Draw Homes to draw homes for package delivery.<br/>
+            &#x25CF; Click on Run! to run the algorithm and see the animation.<br/>
           </p>
           <p class="lead">
             <a href="#canvas" class="btn btn-lg btn-default">Get Started!</a>
@@ -59,7 +73,8 @@
 
   </div>
   <br/>
-  <p class="lead">
+  <span class="lead" id="statusBox"></span>
+  <p class="lead" style="float:right; margin-right:130px;">
     <a class="btn btn-lg btn-default" style="margin-right:20px;" onclick="getPath();">Draw Path</a>
     <a class="btn btn-lg btn-default" style="margin-right:20px;" onclick="getDataset();">Draw Homes</a>
     <a class="btn btn-lg btn-default" style="margin-right:20px;" onclick="tracePath();">Run!</a>
