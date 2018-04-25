@@ -1,5 +1,6 @@
 var c, ctx;
 var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 14, tSize = 18, statusBar;
+var queryRange, minPointsInCluster = 3;
 
 var dataset = [];
 var path = [];
@@ -29,6 +30,8 @@ var resetCanvas = function () {
     currentPath = [];
     $(c).unbind("mousedown").unbind("mouseup");
     ctx.clearRect(0, 0, c.width, c.height);
+    statusBar.innerHTML = '<b>Status</b>: Click on Draw Path, then click anywhere on the canvas below to draw the starting point of the path and \
+                            then click somewhere else on canvas to draw the ending point, then the next ending point and so on, thus creating a path.';
 };
 
 var pointLiesBetweenLine = function (point, line) {
@@ -192,7 +195,7 @@ var getPath = function () {
         $(c).unbind("mouseup");
     });
     statusBar.innerHTML = '<b>Status</b>: Next, click on Draw Homes, then click anywhere on the canvas below to draw a \
-                            set of points representing homes for delivery.';
+                            set of points (at least 3) representing homes for delivery.';
 };
 
 var getDataset = function () {
@@ -225,8 +228,17 @@ var tracePath = function() {
 
     statusBar.innerHTML = '<b>Status: </b> Clustering delivery home data using DBSCAN/KMeans.';
 
-    var queryRange = 100;
-    var minPointsInCluster = 3;
+    var minX = 99999999, maxX = 0, minY = 99999999, maxY = 0;
+
+    path.forEach(function (p) {
+        minX = Math.min(p[0][0], p[1][0]);
+        maxX = Math.max(p[0][0], p[1][0]);
+        minY = Math.min(p[0][1], p[1][1]);
+        maxY = Math.max(p[0][1], p[1][1]);
+    });
+
+    queryRange = Math.max(maxX - minX, maxY - minY) / 3;
+
     var clusters = findClusters(dataset, queryRange, minPointsInCluster);
     var centroids = [];
     clusters.forEach(function (cluster) {
@@ -293,10 +305,10 @@ var tracePath = function() {
     fullPath = pathDrone.map(a => Object.assign([], a));
     pathDrone.unshift([]);
     move();
-    ctx.font="20px Georgia";
+    ctx.font="15px Georgia";
     ctx.fillText('Time Taken: ~' + sumPauseTimes + ' s', 10, 20);
-    ctx.fillText('Drone Speed: ' + droneSpeed + ' m/s', 10, 50);
-    ctx.fillText('Truck Speed: ' + truckSpeed + ' m/s', 10, 80);
+    ctx.fillText('Drone Speed: ' + droneSpeed + ' px/s', 10, 40);
+    ctx.fillText('Truck Speed: ' + truckSpeed + ' px/s', 10, 60);
 };
 
 var init = function (droneSpeed, truckSpeed) {
