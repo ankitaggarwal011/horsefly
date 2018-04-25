@@ -32,6 +32,17 @@ var resetCanvas = function () {
     ctx.clearRect(0, 0, c.width, c.height);
     statusBar.innerHTML = '<b>Status</b>: Click on Draw Path, then click anywhere on the canvas below to draw the starting point of the path and \
                             then click somewhere else on canvas to draw the ending point, then the next ending point and so on, thus creating a path.';
+    ctx.beginPath();
+    ctx.moveTo(0, 65);
+    ctx.lineTo(170, 65);
+    ctx.stroke();
+    ctx.lineTo(170, 0);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.font="15px Georgia";
+    ctx.fillText('Time Taken: ', 10, 20);
+    ctx.fillText('Drone Speed: ' + droneSpeed + ' px/s', 10, 40);
+    ctx.fillText('Truck Speed: ' + truckSpeed + ' px/s', 10, 60);
 };
 
 var pointLiesBetweenLine = function (point, line) {
@@ -83,9 +94,9 @@ var centroid = function (cluster, dataset) {
 };
 
 var findClusters = function (dataset, queryRange, minPointsInCluster) {
-    var dbscan = new DBSCAN();
+    var dbscan = new OPTICS();
     var densityClusters = dbscan.run(dataset, queryRange, minPointsInCluster);
-    var kmeans = new KMEANS(); // DBSCAN might not include all points, run KMEANS
+    var kmeans = new KMEANS(); // OPTICS might not include all points, run KMEANS
     if (densityClusters.length == 0) K = 3;
     else K = densityClusters.length;
     var clusters = kmeans.run(dataset, K);
@@ -226,18 +237,9 @@ var tracePath = function() {
     drone.x = path[0][0][0];
     drone.y = path[0][0][1];
 
-    statusBar.innerHTML = '<b>Status: </b> Clustering delivery home data using DBSCAN/KMeans.';
+    statusBar.innerHTML = '<b>Status: </b> Clustering delivery home data using OPTICS/KMeans.';
 
-    var minX = 99999999, maxX = 0, minY = 99999999, maxY = 0;
-
-    path.forEach(function (p) {
-        minX = Math.min(p[0][0], p[1][0]);
-        maxX = Math.max(p[0][0], p[1][0]);
-        minY = Math.min(p[0][1], p[1][1]);
-        maxY = Math.max(p[0][1], p[1][1]);
-    });
-
-    queryRange = Math.max(maxX - minX, maxY - minY) / 3;
+    queryRange = 100;
 
     var clusters = findClusters(dataset, queryRange, minPointsInCluster);
     var centroids = [];
@@ -305,6 +307,14 @@ var tracePath = function() {
     fullPath = pathDrone.map(a => Object.assign([], a));
     pathDrone.unshift([]);
     move();
+    ctx.clearRect(0, 0, 170, 65);
+    ctx.beginPath();
+    ctx.moveTo(0, 65);
+    ctx.lineTo(170, 65);
+    ctx.stroke();
+    ctx.lineTo(170, 0);
+    ctx.stroke();
+    ctx.closePath();
     ctx.font="15px Georgia";
     ctx.fillText('Time Taken: ~' + sumPauseTimes + ' s', 10, 20);
     ctx.fillText('Drone Speed: ' + droneSpeed + ' px/s', 10, 40);
@@ -325,4 +335,15 @@ var init = function (droneSpeed, truckSpeed) {
     truck.speed = truckSpeed;
     drone.speed = droneSpeed;
     steps = drone.speed / truck.speed;
+    ctx.beginPath();
+    ctx.moveTo(0, 65);
+    ctx.lineTo(170, 65);
+    ctx.stroke();
+    ctx.lineTo(170, 0);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.font="15px Georgia";
+    ctx.fillText('Time Taken: ', 10, 20);
+    ctx.fillText('Drone Speed: ' + droneSpeed + ' px/s', 10, 40);
+    ctx.fillText('Truck Speed: ' + truckSpeed + ' px/s', 10, 60);
 }
