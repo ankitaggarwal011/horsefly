@@ -1,5 +1,5 @@
 var c, ctx;
-var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 14, tSize = 18, statusBar;
+var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 20, tSize = 40, pSize = 4, statusBar;
 var queryRange, minPointsInCluster = 3;
 
 var dataset = [];
@@ -131,10 +131,11 @@ var getAllPointsOnPath = function (path) {
 };
 
 var redrawScene = function () {
+    ctx.clearRect(0, 0, c.width, c.height);
     ctx.beginPath();
     fullPath.forEach(function (p) {
-        ctx.fillRect(p[0][0] - 2, p[0][1] - 2, 4, 4);
-        ctx.fillRect(p[1][0] - 2, p[1][1] - 2, 4, 4);
+        ctx.fillRect(p[0][0] - pSize, p[0][1] - pSize, 2 * pSize, 2 * pSize);
+        ctx.fillRect(p[1][0] - pSize, p[1][1] - pSize, 2 * pSize, 2 * pSize);
         ctx.moveTo(p[0][0], p[0][1]);
         ctx.lineTo(p[1][0], p[1][1]);
         ctx.stroke();
@@ -160,7 +161,7 @@ var move = function() {
 };
 
 var draw = function () {
-    ctx.clearRect(drone.x - size * 1.5, drone.y - size * 1.5, size * 3, size * 3);
+    ctx.clearRect(drone.x - size * 1.5 - 1.5 * 12, drone.y - size * 1.5 + 1.5 * 2, size * 3, size * 3);
     ctx.clearRect(truck.x - tSize * 1.5, truck.y - tSize * 1.5, tSize * 3, tSize * 3);
     redrawScene();
     f += speed;
@@ -172,12 +173,12 @@ var draw = function () {
         truck.y = start[1] + (end[1] - start[1]) * f;
     }
     if (f < 1) {
-        ctx.drawImage(plane_img, drone.x - size, drone.y - size, 2 * size, 2 * size);
         ctx.drawImage(truck_img, truck.x - tSize, truck.y - tSize, 2 * tSize, 2 * tSize);
+        ctx.drawImage(plane_img, drone.x - size - 12, drone.y - size + 2, 2 * size, 2 * size);
         requestAnimationFrame(draw);
     } else {
-        ctx.drawImage(plane_img, drone.x - size, drone.y - size, 2 * size, 2 * size);
         ctx.drawImage(truck_img, truck.x - tSize, truck.y - tSize, 2 * tSize, 2 * tSize);
+        ctx.drawImage(plane_img, drone.x - size - 12, drone.y - size + 2, 2 * size, 2 * size);
         f = 0;
         move();
     }
@@ -191,7 +192,7 @@ var getPath = function () {
     $(c).mousedown(function (mouseEvent) {
         var position = getPosition(mouseEvent, c);
         ctx.lineTo(position.X, position.Y);
-        ctx.fillRect(position.X - 2, position.Y - 2, 4, 4);
+        ctx.fillRect(position.X - pSize, position.Y - pSize, 2 * pSize, 2 * pSize);
         ctx.stroke();
         if (start_pt == null) {
             start_pt = [position.X, position.Y];
@@ -216,7 +217,7 @@ var getDataset = function () {
     var pt;
     $(c).mousedown(function (mouseEvent) {
         var position = getPosition(mouseEvent, c);
-        ctx.fillRect(position.X - 2, position.Y - 2, 4, 4);
+        ctx.fillRect(position.X - pSize, position.Y - pSize, 2 * pSize, 2 * pSize);
         ctx.stroke();
         if (pt != [position.X, position.Y]) {
             pt = [position.X, position.Y];
@@ -274,6 +275,16 @@ var tracePath = function() {
     pausePoints.forEach(function (p) {
         pPoints.push([p[0][0].x, p[0][0].y]);
     });
+
+    function uniq(a) {
+        var seen = {};
+        return a.filter(function(item) {
+            return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+        });
+    }
+
+    pPoints = uniq(pPoints);
+
     pPoints.sort(function (a, b) {
         return ((a[0] - b[0]) || (a[0] === b[0] && a[1] - b[1]));
     });
@@ -304,6 +315,8 @@ var tracePath = function() {
             });
         }
     });
+
+    pathDrone = uniq(pathDrone);
     fullPath = pathDrone.map(a => Object.assign([], a));
     pathDrone.unshift([]);
     move();
@@ -329,7 +342,8 @@ var init = function (droneSpeed, truckSpeed) {
     c.width = c.clientWidth;
     c.height = c.clientHeight;
     ctx = c.getContext("2d");
-    ctx.lineWidth = 1;
+    ctx.lineWidth = pSize - 1;
+    ctx.lineCap = 'round';
     ctx.strokeStyle = 'white';
     ctx.fillStyle = 'white';
     truck.speed = truckSpeed;
