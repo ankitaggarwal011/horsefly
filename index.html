@@ -12,10 +12,11 @@
   #canvas {
     display: block;
     width: 80vw;
-    height: 73vh;
+    height: 83vh;
     border: 4px solid white;
     padding: 0;
     margin: auto;
+    background-color: black;
   }
   .txt {
     text-align: left;
@@ -42,13 +43,14 @@
     <div class="site-wrapper-inner">
       <div class="cover-container">
         <div class="masthead clearfix">
-          <div class="inner">
+          <div class="inner" style="padding-top: 0px;">
             <h3 class="masthead-brand"><a href="/">HorseFly</a></h3>
           </div>
         </div>
         <div class="inner cover">
           <h1 class="cover-heading">What is HorseFly?</h1>
           <p class="lead txt">HorseFly is a a delivery system where a moving truck (with packages) and a drone are autonomously coordinating to deliver the packages to the customer homes in approximately minimum time.</p>
+          <p class="lead txt">The algorithm uses OPTICS density clustering and kdTree based nearest neighbour search.</p>
           <br/>
           <h1 class="cover-heading">How to visualize?</h1>
           <p class="lead txt">
@@ -57,22 +59,16 @@
             &#x25CF; Click on Run! to run the algorithm and see the animation.<br/>
           </p>
           <p class="lead">
-            <a href="#canvas" class="btn btn-lg btn-default">Get Started!</a>
+            <a href="#anchor" class="btn btn-lg btn-default">Get Started!</a>
           </p>
         </div>
-
-        <div class="mastfoot">
-          <div class="inner">
-            <p><a href="http://www.ams.sunysb.edu/~jsbm/courses/545/ams545.html" target="_blank">Computational Geometry</a> project, by <a href="https://ankitaggarwal.me" target="_blank">Ankit Aggarwal</a>.</p>
-          </div>
-        </div>
-
       </div>
 
     </div>
 
   </div>
   <br/>
+  <p id="anchor"></p>
   <span class="lead" id="statusBox"></span>
   <p class="lead" style="float:right; margin-right:130px;">
     <a class="btn btn-lg btn-default" style="margin-right:20px;" onclick="getPath();">Draw Path</a>
@@ -81,9 +77,14 @@
     <a class="btn btn-lg btn-default" onclick="resetCanvas();">Reset</a>
   </p>
   <canvas id="canvas"></canvas>
+  <div class="mastfoot">
+    <div class="inner">
+      <p><a href="http://www.ams.sunysb.edu/~jsbm/courses/545/ams545.html" target="_blank">Computational Geometry</a> project, by <a href="https://ankitaggarwal.me" target="_blank">Ankit Aggarwal</a></p>
+    </div>
+  </div>
   <script type="text/javascript">
     var droneSpeed = 20;
-    var truckSpeed = 10;
+    var truckSpeed = 40;
     window.onload = init(droneSpeed, truckSpeed);
   </script>
 </body>

@@ -1,5 +1,5 @@
 var c, ctx;
-var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 20, tSize = 40, pSize = 4, statusBar;
+var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 30, tSize = 50, pSize = 4, statusBar, sumPauseTimes, prev_coords;
 var queryRange, minPointsInCluster = 3;
 
 var dataset = [];
@@ -23,6 +23,39 @@ plane_img.src = "img/plane.svg";
 var truck_img = new Image();
 truck_img.src = "img/truck.svg";
 
+var drawGrid = function(gap) {
+    ctx.lineWidth = 0.1;
+    for (var x = 0; x <= c.width; x += gap) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, c.height);
+        for (var y = 0; y <= c.height; y += gap) {
+            ctx.moveTo(0, y);
+            ctx.lineTo(c.width, y);
+        }
+    }
+    ctx.stroke();
+    ctx.lineWidth = pSize;
+};
+
+var drawBox = function (t) {
+    drawGrid(120);
+    ctx.clearRect(0, 0, 170, 90);
+    ctx.beginPath();
+    ctx.moveTo(0, 90);
+    ctx.lineTo(170, 90);
+    ctx.stroke();
+    ctx.lineTo(170, 0);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.font="15px Georgia";
+    ctx.fillStyle = "white";
+    if (t == null) ctx.fillText('Time Taken: ', 10, 20);
+    else ctx.fillText('Time Taken: ~' + t + ' s', 10, 20);
+    ctx.fillText('Drone Speed: ' + drone.speed + ' px/s', 10, 40);
+    ctx.fillText('Truck Speed: ' + truck.speed + ' px/s', 10, 60);
+    ctx.fillText('Size: ' + c.width + 'px X ' + c.height + 'px', 10, 80);
+}
+
 var resetCanvas = function () {
     dataset = [];
     path = [];
@@ -32,17 +65,7 @@ var resetCanvas = function () {
     ctx.clearRect(0, 0, c.width, c.height);
     statusBar.innerHTML = '<b>Status</b>: Click on Draw Path, then click anywhere on the canvas below to draw the starting point of the path and \
                             then click somewhere else on canvas to draw the ending point, then the next ending point and so on, thus creating a path.';
-    ctx.beginPath();
-    ctx.moveTo(0, 65);
-    ctx.lineTo(170, 65);
-    ctx.stroke();
-    ctx.lineTo(170, 0);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.font="15px Georgia";
-    ctx.fillText('Time Taken: ', 10, 20);
-    ctx.fillText('Drone Speed: ' + droneSpeed + ' px/s', 10, 40);
-    ctx.fillText('Truck Speed: ' + truckSpeed + ' px/s', 10, 60);
+    drawBox(null);
 };
 
 var pointLiesBetweenLine = function (point, line) {
@@ -132,6 +155,7 @@ var getAllPointsOnPath = function (path) {
 
 var redrawScene = function () {
     ctx.clearRect(0, 0, c.width, c.height);
+    drawBox(sumPauseTimes);
     ctx.beginPath();
     fullPath.forEach(function (p) {
         ctx.fillRect(p[0][0] - pSize, p[0][1] - pSize, 2 * pSize, 2 * pSize);
@@ -160,25 +184,50 @@ var move = function() {
     draw();
 };
 
+var slopeAngle = function (p1, p2) {
+    if (p1[0] == p2[0]) {
+        if (p2[1] > p1[1]) return -Math.PI / 2;
+        else return Math.PI / 2;
+    }
+    var angleRadians = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
+    return angleRadians;
+};
+
+var drawRotatedImageTruck = function (img, x, y, width, height, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.drawImage(img, -width / 2, -height / 2, width, height);
+    ctx.restore();
+};
+
+var drawRotatedImageDrone = function (img, x, y, width, height, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.drawImage(img, -width / 2, -height / 2, width, height);
+    ctx.restore();
+};
+
 var draw = function () {
-    ctx.clearRect(drone.x - size * 1.5 - 1.5 * 12, drone.y - size * 1.5 + 1.5 * 2, size * 3, size * 3);
-    ctx.clearRect(truck.x - tSize * 1.5, truck.y - tSize * 1.5, tSize * 3, tSize * 3);
     redrawScene();
     f += speed;
     var start = currentPath[0], end = currentPath[1];
     drone.x = start[0] + (end[0] - start[0]) * f;
     drone.y = start[1] + (end[1] - start[1]) * f;
     if ($.inArray(start, dataset) == -1 && $.inArray(end, dataset) == -1) {
+        prev_coords = [truck.x, truck.y];
         truck.x = start[0] + (end[0] - start[0]) * f;
         truck.y = start[1] + (end[1] - start[1]) * f;
     }
+    var rotationAngle = slopeAngle(prev_coords, [truck.x, truck.y]);
     if (f < 1) {
-        ctx.drawImage(truck_img, truck.x - tSize, truck.y - tSize, 2 * tSize, 2 * tSize);
-        ctx.drawImage(plane_img, drone.x - size - 12, drone.y - size + 2, 2 * size, 2 * size);
+        drawRotatedImageTruck(truck_img, truck.x, truck.y, 2 * tSize, 2 * tSize, rotationAngle);
+        drawRotatedImageDrone(plane_img, drone.x, drone.y, 2 * size, 2 * size, rotationAngle);
         requestAnimationFrame(draw);
     } else {
-        ctx.drawImage(truck_img, truck.x - tSize, truck.y - tSize, 2 * tSize, 2 * tSize);
-        ctx.drawImage(plane_img, drone.x - size - 12, drone.y - size + 2, 2 * size, 2 * size);
+        drawRotatedImageTruck(truck_img, truck.x, truck.y, 2 * tSize, 2 * tSize, rotationAngle);
+        drawRotatedImageDrone(plane_img, drone.x, drone.y, 2 * size, 2 * size, rotationAngle);
         f = 0;
         move();
     }
@@ -233,10 +282,24 @@ var getDataset = function () {
 
 var tracePath = function() {
     $(c).unbind("mousedown").unbind("mouseup");
+
+    if (path.length == 0) {
+        statusBar.innerHTML = '<b>Status: </b> Please draw a path.';
+        return;
+    }
+
+    if (dataset.length < 3) {
+        statusBar.innerHTML = '<b>Status: </b> Please add more homes.';
+        return;
+    }
+
     truck.x = path[0][0][0];
     truck.y = path[0][0][1];
     drone.x = path[0][0][0];
     drone.y = path[0][0][1];
+
+    prev_coords = [truck.x, truck.y];
+    steps = (drone.speed / truck.speed) * (path.length);
 
     statusBar.innerHTML = '<b>Status: </b> Clustering delivery home data using OPTICS/KMeans.';
 
@@ -264,7 +327,8 @@ var tracePath = function() {
         pausePoints.push(tree.nearest(toDict(centroid), 1));
         clusterToPauseMapping[[pausePoints[index][0][0].x, pausePoints[index][0][0].y]] = clusters[index];
     });
-    var pauseTimes = [], sumPauseTimes = 0;
+    var pauseTimes = [];
+    sumPauseTimes = 0;
     clusters.forEach(function (cluster, index) {
         var dist = Math.sqrt(pausePoints[index][0][1]);
         pauseTimes.push(Math.ceil((cluster.length * dist * 2) / droneSpeed));
@@ -320,18 +384,7 @@ var tracePath = function() {
     fullPath = pathDrone.map(a => Object.assign([], a));
     pathDrone.unshift([]);
     move();
-    ctx.clearRect(0, 0, 170, 65);
-    ctx.beginPath();
-    ctx.moveTo(0, 65);
-    ctx.lineTo(170, 65);
-    ctx.stroke();
-    ctx.lineTo(170, 0);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.font="15px Georgia";
-    ctx.fillText('Time Taken: ~' + sumPauseTimes + ' s', 10, 20);
-    ctx.fillText('Drone Speed: ' + droneSpeed + ' px/s', 10, 40);
-    ctx.fillText('Truck Speed: ' + truckSpeed + ' px/s', 10, 60);
+    drawBox(sumPauseTimes);
 };
 
 var init = function (droneSpeed, truckSpeed) {
@@ -348,16 +401,5 @@ var init = function (droneSpeed, truckSpeed) {
     ctx.fillStyle = 'white';
     truck.speed = truckSpeed;
     drone.speed = droneSpeed;
-    steps = drone.speed / truck.speed;
-    ctx.beginPath();
-    ctx.moveTo(0, 65);
-    ctx.lineTo(170, 65);
-    ctx.stroke();
-    ctx.lineTo(170, 0);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.font="15px Georgia";
-    ctx.fillText('Time Taken: ', 10, 20);
-    ctx.fillText('Drone Speed: ' + droneSpeed + ' px/s', 10, 40);
-    ctx.fillText('Truck Speed: ' + truckSpeed + ' px/s', 10, 60);
+    drawBox(null);
 }
