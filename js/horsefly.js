@@ -1,5 +1,5 @@
 var c, ctx;
-var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 30, tSize = 50, pSize = 4, statusBar, sumPauseTimes, prev_coords;
+var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 22.5, tSize = 37.5, pSize = 4, statusBar, sumPauseTimes, prev_coords;
 var queryRange, minPointsInCluster = 3;
 
 var dataset = [];
@@ -38,6 +38,8 @@ var drawGrid = function(gap) {
 };
 
 var drawBox = function (t) {
+    ctx.strokeStyle = 'white';
+    ctx.fillStyle = 'white';
     drawGrid(120);
     ctx.clearRect(0, 0, 170, 90);
     ctx.beginPath();
@@ -48,12 +50,13 @@ var drawBox = function (t) {
     ctx.stroke();
     ctx.closePath();
     ctx.font="15px Georgia";
-    ctx.fillStyle = "white";
     if (t == null) ctx.fillText('Time Taken: ', 10, 20);
     else ctx.fillText('Time Taken: ~' + t + ' s', 10, 20);
     ctx.fillText('Drone Speed: ' + drone.speed + ' px/s', 10, 40);
     ctx.fillText('Truck Speed: ' + truck.speed + ' px/s', 10, 60);
     ctx.fillText('Size: ' + c.width + 'px X ' + c.height + 'px', 10, 80);
+    ctx.strokeStyle = '#dadada';
+    ctx.fillStyle = 'green';
 }
 
 var resetCanvas = function () {
@@ -158,10 +161,10 @@ var redrawScene = function () {
     drawBox(sumPauseTimes);
     ctx.beginPath();
     fullPath.forEach(function (p) {
-        ctx.fillRect(p[0][0] - pSize, p[0][1] - pSize, 2 * pSize, 2 * pSize);
-        ctx.fillRect(p[1][0] - pSize, p[1][1] - pSize, 2 * pSize, 2 * pSize);
         ctx.moveTo(p[0][0], p[0][1]);
         ctx.lineTo(p[1][0], p[1][1]);
+        ctx.fillRect(p[0][0] - 2 * pSize, p[0][1] - 2 * pSize, 4 * pSize, 4 * pSize);
+        ctx.fillRect(p[1][0] - 2 * pSize, p[1][1] - 2 * pSize, 4 * pSize, 4 * pSize);
         ctx.stroke();
     });
     ctx.closePath();
@@ -241,7 +244,7 @@ var getPath = function () {
     $(c).mousedown(function (mouseEvent) {
         var position = getPosition(mouseEvent, c);
         ctx.lineTo(position.X, position.Y);
-        ctx.fillRect(position.X - pSize, position.Y - pSize, 2 * pSize, 2 * pSize);
+        ctx.fillRect(position.X - 2 * pSize, position.Y - 2 * pSize, 4 * pSize, 4 * pSize);
         ctx.stroke();
         if (start_pt == null) {
             start_pt = [position.X, position.Y];
@@ -266,7 +269,7 @@ var getDataset = function () {
     var pt;
     $(c).mousedown(function (mouseEvent) {
         var position = getPosition(mouseEvent, c);
-        ctx.fillRect(position.X - pSize, position.Y - pSize, 2 * pSize, 2 * pSize);
+        ctx.fillRect(position.X - 2 * pSize, position.Y - 2 * pSize, 4 * pSize, 4 * pSize);
         ctx.stroke();
         if (pt != [position.X, position.Y]) {
             pt = [position.X, position.Y];
@@ -397,8 +400,8 @@ var init = function (droneSpeed, truckSpeed) {
     ctx = c.getContext("2d");
     ctx.lineWidth = pSize - 1;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = 'white';
-    ctx.fillStyle = 'white';
+    ctx.strokeStyle = '#dadada';
+    ctx.fillStyle = 'green';
     truck.speed = truckSpeed;
     drone.speed = droneSpeed;
     drawBox(null);
