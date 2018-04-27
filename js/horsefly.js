@@ -1,5 +1,5 @@
 var c, ctx;
-var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 22.5, tSize = 37.5, pSize = 4, statusBar, sumPauseTimes, prev_coords;
+var speed, currentPath, fullPath, pathDrone, f = 0, steps, size = 22.5, tSize = 37.5, pSize = 3.5, statusBar, sumPauseTimes, prev_coords;
 var queryRange, minPointsInCluster = 3;
 
 var dataset = [];
@@ -28,10 +28,11 @@ var drawGrid = function(gap) {
     for (var x = 0; x <= c.width; x += gap) {
         ctx.moveTo(x, 0);
         ctx.lineTo(x, c.height);
-        for (var y = 0; y <= c.height; y += gap) {
-            ctx.moveTo(0, y);
-            ctx.lineTo(c.width, y);
-        }
+    }
+    ctx.stroke();
+    for (var y = 0; y <= c.height; y += gap) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(c.width, y);
     }
     ctx.stroke();
     ctx.lineWidth = pSize;
@@ -40,7 +41,7 @@ var drawGrid = function(gap) {
 var drawBox = function (t) {
     ctx.strokeStyle = 'white';
     ctx.fillStyle = 'white';
-    drawGrid(120);
+    drawGrid(90);
     ctx.clearRect(0, 0, 170, 90);
     ctx.beginPath();
     ctx.moveTo(0, 90);
@@ -55,8 +56,8 @@ var drawBox = function (t) {
     ctx.fillText('Drone Speed: ' + drone.speed + ' px/s', 10, 40);
     ctx.fillText('Truck Speed: ' + truck.speed + ' px/s', 10, 60);
     ctx.fillText('Size: ' + c.width + 'px X ' + c.height + 'px', 10, 80);
-    ctx.strokeStyle = '#dadada';
-    ctx.fillStyle = 'green';
+    ctx.strokeStyle = '#DDDDDD';
+    ctx.fillStyle = '#2ECC40';
 }
 
 var resetCanvas = function () {
@@ -163,8 +164,16 @@ var redrawScene = function () {
     fullPath.forEach(function (p) {
         ctx.moveTo(p[0][0], p[0][1]);
         ctx.lineTo(p[1][0], p[1][1]);
+        ctx.stroke();
+        if ($.inArray(p[0], dataset) == -1) {
+            ctx.fillStyle = '#FF4136';
+        }
         ctx.fillRect(p[0][0] - 2 * pSize, p[0][1] - 2 * pSize, 4 * pSize, 4 * pSize);
+        if ($.inArray(p[1], dataset) == -1) {
+            ctx.fillStyle = '#FF4136';
+        }
         ctx.fillRect(p[1][0] - 2 * pSize, p[1][1] - 2 * pSize, 4 * pSize, 4 * pSize);
+        ctx.fillStyle = '#2ECC40';
         ctx.stroke();
     });
     ctx.closePath();
@@ -188,12 +197,7 @@ var move = function() {
 };
 
 var slopeAngle = function (p1, p2) {
-    if (p1[0] == p2[0]) {
-        if (p2[1] > p1[1]) return -Math.PI / 2;
-        else return Math.PI / 2;
-    }
-    var angleRadians = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
-    return angleRadians;
+    return Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
 };
 
 var drawRotatedImageTruck = function (img, x, y, width, height, angle) {
@@ -244,7 +248,10 @@ var getPath = function () {
     $(c).mousedown(function (mouseEvent) {
         var position = getPosition(mouseEvent, c);
         ctx.lineTo(position.X, position.Y);
+        ctx.stroke();
+        ctx.fillStyle = '#FF4136';
         ctx.fillRect(position.X - 2 * pSize, position.Y - 2 * pSize, 4 * pSize, 4 * pSize);
+        ctx.fillStyle = '#2ECC40';
         ctx.stroke();
         if (start_pt == null) {
             start_pt = [position.X, position.Y];
@@ -400,8 +407,8 @@ var init = function (droneSpeed, truckSpeed) {
     ctx = c.getContext("2d");
     ctx.lineWidth = pSize - 1;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#dadada';
-    ctx.fillStyle = 'green';
+    ctx.strokeStyle = '#DDDDDD';
+    ctx.fillStyle = '#2ECC40';
     truck.speed = truckSpeed;
     drone.speed = droneSpeed;
     drawBox(null);
