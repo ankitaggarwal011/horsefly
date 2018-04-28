@@ -52,7 +52,7 @@ var drawBox = function (t) {
     ctx.closePath();
     ctx.font="15px Georgia";
     if (t == null) ctx.fillText('Time Taken: ', 10, 20);
-    else ctx.fillText('Time Taken: ~' + t + ' s', 10, 20);
+    else ctx.fillText('Time Taken: ' + Math.round(t) + ' s', 10, 20);
     ctx.fillText('Drone Speed: ' + drone.speed + ' px/s', 10, 40);
     ctx.fillText('Truck Speed: ' + truck.speed + ' px/s', 10, 60);
     ctx.fillText('Size: ' + c.width + 'px X ' + c.height + 'px', 10, 80);
@@ -192,6 +192,12 @@ var move = function() {
     var start = path[0], end = path[1];
     var dx = end[0] - start[0], dy = end[1] - start[1];
     var dist = Math.abs(Math.sqrt(dx * dx + dy * dy));
+    if ($.inArray(start, dataset) == -1 && $.inArray(end, dataset) == -1) {
+        sumPauseTimes += dist / truck.speed;
+    }
+    else {
+        sumPauseTimes += dist / drone.speed;
+    }
     speed = steps / dist;
     draw();
 };
@@ -337,13 +343,7 @@ var tracePath = function() {
         pausePoints.push(tree.nearest(toDict(centroid), 1));
         clusterToPauseMapping[[pausePoints[index][0][0].x, pausePoints[index][0][0].y]] = clusters[index];
     });
-    var pauseTimes = [];
     sumPauseTimes = 0;
-    clusters.forEach(function (cluster, index) {
-        var dist = Math.sqrt(pausePoints[index][0][1]);
-        pauseTimes.push(Math.ceil((cluster.length * dist * 2) / droneSpeed));
-        sumPauseTimes += pauseTimes[index];
-    });
     var tPath = [];
     var pPoints = [];
     pausePoints.forEach(function (p) {
