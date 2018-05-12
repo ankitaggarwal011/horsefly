@@ -1,12 +1,11 @@
 # HorseFly: Coordinated logistics with a truck and a drone
-## Description
-[Demo Link](https://cg.ankitaggarwal.me)
+## Description [[Demo Link](https://cg.ankitaggarwal.me)]
 Consider a delivery system where a moving truck (with packages) and a drone are autonomously coordinating to deliver the packages in the customer homes. The truck is moving along a predefined path on a map while a drone picks up one package at a time from the truck, delivers it to a customer, and returns to the truck to pick up the next package.
 
 Our goal is to explore the heuristics and define an algorithm using computational geometry to deliver all of the given packages in the minimum time possible. Another goal is to build a visually appealing web application of an interactive visualization of the animated path of the drone and truck completing a set of deliveries.
 
 ## Motivation
-This project was a part of the graduate course on Computational Geometry by Prof. Joe Mitchell.
+This project was a part of the graduate course on [Computational Geometry](http://www.ams.sunysb.edu/~jsbm/courses/545/ams545.html) by Prof. Joe Mitchell.
 
 ## Algorithm
 - Compute the clusters of homes using OPTICS density clustering (a heuristic is to choose a neighbourhood size for clustering) and get the number of clusters that can be formed.
@@ -26,3 +25,6 @@ This project was a part of the graduate course on Computational Geometry by Prof
 
 ## Author
 Ankit Aggarwal
+
+## References
+- [Coordinated logistics with a truck and a drone](https://pdfs.semanticscholar.org/23a4/3524fd5168acfd589e919c143f49a6eeeac3.pdf)
